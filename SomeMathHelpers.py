@@ -1,6 +1,7 @@
 import numpy as np
 import math
 import matplotlib.pyplot as plt
+from sympy import symbols, sympify, lambdify
 
 
 class Derivatives:
@@ -94,15 +95,60 @@ class NumericalAnalysis:
             eq = (fofx0[i]/factorial)
             z = ""
             if (x-1 == 0):
-                z = "(" + "x+" + str(x) + ")"
+                z = "(" + "x+" + str(x) + ")**" + str(i+1)
             else:
-                z = "(" + "x" + str(x) + ")"
+                z = "(" + "x" + str(x) + ")**" + str(i+1)
             if (eq==1):
                 text = text + z
             else:
-                text = text + str(eq) + z
+                text = text + str(eq) + "*" + z
             if (i < len(fofx0)-1):
                 text = text + " + "
             multiplier = multiplier + 1
             factorial = factorial * multiplier
         return text
+    
+    def get_taylor_series_as_graph(orig_f_coe, orig_f_exp, x0, fofx0):
+        factorial = 1
+        multiplier = 1
+        eq = 0
+        expr = ""
+        expr = str(Derivatives.evaluate_single(orig_f_coe, orig_f_exp, x0)) + " + "
+        for i in range(len(fofx0)):
+            x = (x0 * -1)
+            eq = (fofx0[i]/factorial)
+            z = ""
+            if (x-1 == 0):
+                z = "(" + "x+" + str(x) + ")**" + str(i+1)
+            else:
+                z = "(" + "x" + str(x) + ")**" + str(i+1)
+            if (eq==1):
+                expr = expr + z
+            else:
+                expr = expr + str(eq) + "*" + z
+            if (i < len(fofx0)-1):
+                expr = expr + " + "
+            multiplier = multiplier + 1
+            factorial = factorial * multiplier
+            
+        # Define symbols
+        x = symbols('x')
+        parse = sympify(expr)
+        
+        # 4. Convert symbolic → numerical function
+        f = lambdify(x, parse, 'numpy')
+
+        # 5. Generate x values
+        x_vals = np.linspace(-5, 5, 400)
+
+        # 6. Compute y values
+        y_vals = f(x_vals)
+
+        # 7. Plot
+        plt.plot(x_vals, y_vals)
+        plt.xlabel("x")
+        plt.ylabel("f(x)")
+        plt.title("f(x) = " + str(expr), fontsize=5)
+        plt.grid()
+
+        plt.show()
